@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Security Password Analyzer</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+.container{
+  background:#fff;
+  width:100%;
+  max-width:450px;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+h2{text-align:center;margin-bottom:15px}
+.input-box{position:relative}
+input{
+  width:100%;
+  padding:12px 40px 12px 12px;
+  border:2px solid #ccc;
+  border-radius:8px;
+  font-size:16px;
+}
+.toggle{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  font-size:13px;
+  color:#555;
+}
+.bar{
+  height:10px;
+  background:#ddd;
+  border-radius:5px;
+  margin:15px 0;
+  overflow:hidden;
+}
+#strength{height:100%;width:0%;transition:.4s}
+p{font-size:14px;margin:6px 0}
+.rules li{font-size:13px;color:#999}
+.rules li.valid{color:green}
+.box{
+  background:#f4f4f4;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  font-size:13px;
+}
+strong{color:#2c5364}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>🔐 Cyber Security Password Analyzer</h2>
+
+<div class="input-box">
+<input type="password" id="password" placeholder="Enter password">
+<span class="toggle" id="toggle">Show</span>
+</div>
+
+<div class="bar"><div id="strength"></div></div>
+
+<p id="status"></p>
+<p id="score"></p>
+<p id="time"></p>
+
+<ul class="rules">
+<li id="l">✔ Minimum 8 characters</li>
+<li id="u">✔ Uppercase letter</li>
+<li id="lo">✔ Lowercase letter</li>
+<li id="n">✔ Number</li>
+<li id="s">✔ Special character</li>
+</ul>
+
+<div class="box" id="analysis"></div>
+<div class="box" id="suggest"></div>
+
+</div>
+
+<script>
+const pass = document.getElementById("password");
+const strength = document.getElementById("strength");
+const status = document.getElementById("status");
+const scoreText = document.getElementById("score");
+const timeText = document.getElementById("time");
+const analysis = document.getElementById("analysis");
+const suggest = document.getElementById("suggest");
+const toggle = document.getElementById("toggle");
+
+const rules = {
+ l:document.getElementById("l"),
+ u:document.getElementById("u"),
+ lo:document.getElementById("lo"),
+ n:document.getElementById("n"),
+ s:document.getElementById("s")
+};
+
+toggle.onclick=()=>{
+ pass.type = pass.type==="password"?"text":"password";
+ toggle.textContent = pass.type==="password"?"Show":"Hide";
+}
+
+function generateStrong(base){
+ return base.charAt(0).toUpperCase() +
+ base.slice(1) +
+ "@"+Math.floor(Math.random()*90+10)+"X!";
+}
+
+pass.addEventListener("input",()=>{
+ let v = pass.value;
+ let score = 0;
+ let tips = [];
+
+ if(v.length>=8){rules.l.classList.add("valid");score+=20}
+ else{rules.l.classList.remove("valid");tips.push("increase length")}
+
+ if(/[A-Z]/.test(v)){rules.u.classList.add("valid");score+=20}
+ else{rules.u.classList.remove("valid");tips.push("add uppercase")}
+
+ if(/[a-z]/.test(v)){rules.lo.classList.add("valid");score+=20}
+ else{rules.lo.classList.remove("valid");tips.push("add lowercase")}
+
+ if(/[0-9]/.test(v)){rules.n.classList.add("valid");score+=20}
+ else{rules.n.classList.remove("valid");tips.push("add number")}
+
+ if(/[@$!%*?&]/.test(v)){rules.s.classList.add("valid");score+=20}
+ else{rules.s.classList.remove("valid");tips.push("add special char")}
+
+ strength.style.width = score+"%";
+ scoreText.innerHTML = "<strong>Score:</strong> "+score+"/100";
+
+ if(score<40){
+  strength.style.background="red";
+  status.textContent="❌ Weak Password";
+  timeText.textContent="Crack Time: Seconds";
+ }
+ else if(score<80){
+  strength.style.background="orange";
+  status.textContent="⚠ Medium Password";
+  timeText.textContent="Crack Time: Hours / Days";
+ }
+ else{
+  strength.style.background="green";
+  status.textContent="✅ Strong Password";
+  timeText.textContent="Crack Time: Years";
+ }
+
+ analysis.innerHTML = "<strong>Security Analysis:</strong><br>" +
+ (tips.length? "Weak because: "+tips.join(", "):"Good entropy & complexity");
+
+ if(score<80 && v.length>2){
+  suggest.innerHTML = "<strong>Suggested Strong Password:</strong><br>" +
+  generateStrong(v);
+ } else {
+  suggest.innerHTML = "<strong>Suggestion:</strong><br>Already strong ✔";
+ }
+});
+</script>
+</body>
+</html>
